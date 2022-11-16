@@ -4,9 +4,15 @@ export const initialConnectionHandler = (client) => {
   client.emit("welcome", { message: `Welcome to the chat ${client.id}!` });
 
   client.on("setUsername", (payload) => {
-    onlineUsers.push({ username: payload.username, socketId: client.id });
-    client.emit("loggedIn", onlineUsers);
-    client.broadcast.emit("newConnection", onlineUsers);
+    let userIndex = onlineUsers.findIndex(
+      (user) =>
+        user.socketId === client.id || user.username === payload.username
+    );
+    if (userIndex === -1) {
+      onlineUsers.push({ username: payload.username, socketId: client.id });
+      client.emit("loggedIn", onlineUsers);
+      client.broadcast.emit("newConnection", onlineUsers);
+    }
   });
 
   client.on("sendMessage", (message) => {
